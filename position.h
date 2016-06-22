@@ -1,21 +1,15 @@
 /*
-  Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-  Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
-  Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
-  Copyright (C) 2015-2016 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
-
-  Stockfish is free software: you can redistribute it and/or modify
+  Nayeem - A UCI chess engine. Copyright (C) 2013-2015 Mohamed Nayeem
+  Nayeem is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-
-  Stockfish is distributed in the hope that it will be useful,
+  Nayeem is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  along with Nayeem. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef POSITION_H_INCLUDED
@@ -99,6 +93,9 @@ public:
   // FEN string input/output
   Position& set(const std::string& fenStr, bool isChess960, StateInfo* si, Thread* th);
   const std::string fen() const;
+#ifdef LOMONOSOV_TB
+  void lomonosov_position(int *side, unsigned int *psqW, unsigned int *psqB, int *piCount, int *sqEnP);
+#endif
 
   // Position representation
   Bitboard pieces() const;
@@ -146,6 +143,7 @@ public:
   // Piece specific
   bool pawn_passed(Color c, Square s) const;
   bool opposite_bishops() const;
+  Bitboard queen_pins(Color c) const;
 
   // Doing and undoing moves
   void do_move(Move m, StateInfo& st, bool givesCheck);
@@ -316,6 +314,10 @@ inline Bitboard Position::discovered_check_candidates() const {
 
 inline Bitboard Position::pinned_pieces(Color c) const {
   return slider_blockers(pieces(c), pieces(~c), square<KING>(c));
+}
+
+inline Bitboard Position::queen_pins(Color c) const {
+  return pieceCount[c][QUEEN] > 0 ? slider_blockers(c, pieceList[c][QUEEN][0], c, false) : 0;
 }
 
 inline bool Position::pawn_passed(Color c, Square s) const {
